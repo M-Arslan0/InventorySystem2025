@@ -1,0 +1,229 @@
+/* Modal Overlay */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    min-height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    overflow: auto;
+  }
+
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    min-height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    overflow: auto;
+  }
+
+
+  /* Modal Content */
+  .modal-content {
+    background: white;
+    border-radius: 8px;
+    width: 100%;
+    max-width: 1000px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    animation: fadeIn 0.3s ease-in-out;
+    text-align: left;
+    overflow: auto; /* Enable scrolling for the modal content */
+    max-height: 90vh; /* Optional: limit the height to 90% of the viewport */
+  }
+
+  /* Header */
+  .preview-content h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #333;
+    text-align: center;
+  }
+
+  /* Paragraphs */
+  .preview-content p {
+    margin: 10px 0;
+    font-size: 16px;
+    color: #555;
+  }
+
+  .preview-content p strong {
+    color: #333;
+  }
+
+  /* Modal Actions */
+  .modal-actions {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+    margin: 1rem;
+  }
+
+  .modal-actions button {
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: bold;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .modal form{
+	padding:15px;
+	height:100%;
+}
+.modal input, .modal select, .modal textarea{
+	padding:6px;
+	width:100%;
+	border:1px solid #c2d6d6;
+	border-radius:4px;
+	font-size:15px;
+	font-weight:500;
+}
+.modal input:focus ,textarea:focus {
+  background-color: #ffffe6;
+}
+.modal input[type=button]{
+	padding:7px;
+	font-size:13px;
+	background-color:#d0e1e1;
+	transition-duration: 0.6s;
+}
+.modal input[type=button]:hover{
+	background-color:#a3c2c2;
+	cursor:pointer;
+}
+.modal label, .modal-login label{
+	font-size:13px;
+	font-weight:500;
+	color:#006666;
+	padding:6px;
+	text-transform: uppercase;
+}
+.modal label i{
+	margin-left:15px;
+	font-size:15px;
+}
+.modal label i:hover{
+	cursor:pointer;
+	color:red;
+}
+.modal p{
+	font-size:12px;
+	font-weight:500;
+	color:#006666;
+	padding:5px;
+}
+
+.modal b{
+	font-size:12px;
+	font-weight:500;
+	color:#ff6600;
+	padding:3px;
+	float:right;
+}
+.modal button, .modal-login button{
+	width:32%;
+	padding:7px;
+	color:#006666;
+	border:1px solid #c2d6d6;
+	border-radius:4px;
+	font-weight:500;
+	transition-duration: 0.4s;
+}
+.modal button i{
+	margin-right:3px;
+}
+.modal Button:hover, .modal-login button:hover, a:hover{
+	color:#ffffff;
+	background-color:#006666;
+	cursor:pointer;
+}
+
+.modal h1, .modal-login h1{
+	width:100%;
+	padding:10px;
+	font-size:13px;
+	text-align:center;
+	background-color:#006666;
+	border-radius:6px 6px 0px 0px;
+	text-transform: uppercase;
+	color:white;
+}
+.modal h4{
+	font-size:20px;
+	font-style:italic;
+	color:#669999;
+}
+
+  .modal-actions button:first-child {
+    background-color: #4CAF50;
+    color: white;
+  }
+
+  .modal-actions button:first-child:hover {
+    background-color: #45A049;
+  }
+
+  .modal-actions button:last-child {
+    background-color: #F44336;
+    color: white;
+  }
+
+  .modal-actions button:last-child:hover {
+    background-color: #E53935;
+  }
+
+  /* Fade-in Animation */
+  @keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+  }
+
+  /* Styles for printing */
+  @media print {
+    body {
+        font-size: 14px; /* Adjust font size for printing */
+        line-height: 1.5; /* Set line height for better readability */
+    }
+
+    .preview-content {
+        width: 100%; /* Ensure the content fits the page */
+        margin: 0 auto; /* Center content on the page */
+        padding: 20px; /* Add spacing for clarity */
+    }
+
+    .modal-actions {
+        display: none; /* Hide action buttons during printing */
+    }
+
+    h1 {
+        font-size: 18px; /* Adjust heading size */
+        text-align: center; /* Center the heading */
+    }
+
+    p {
+        margin: 5px 0; /* Reduce spacing between paragraphs */
+    }
+
+    /* Page breaks (if needed) */
+    .page-break {
+        page-break-before: always;
+    }
+  }
