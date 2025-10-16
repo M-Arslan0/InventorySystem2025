@@ -6,8 +6,9 @@ import CustomerList from '../CustomerList/CustomerList'
 import SalePage from '../SaleForm/SaleForm'
 import PurchaseForm from '../PurchaseForm/PurchaseForm'
 import VendorList from '../VendorList/VendorList';
-import AccountsList from '../AccountsList/AccountsList';
+import AccountsManagement from '../AccountsManagement/AccountsManagement';
 import InventoryList from '../InventoryList/InventoryList';
+import Settings from '../Settings/Settings';
 
 export default function AppRoutes() {
 /*     const { user } = useSelector((state) => state.auth); */
@@ -21,7 +22,8 @@ export default function AppRoutes() {
         <Route path="/InventoryList" element={<InventoryList />} />
         <Route path="/PurchaseForm" element={<PurchaseForm />} />
         <Route path="/VendorList" element={<VendorList />} />
-        <Route path="/AccountList" element={<AccountsList />} />
+        <Route path="/AccountsManagement" element={<AccountsManagement />} />
+        <Route path="/Settings" element={<Settings />} />
 
         {/* <Route path="*" element={<PageNotFound />} /> */}
       </Routes>

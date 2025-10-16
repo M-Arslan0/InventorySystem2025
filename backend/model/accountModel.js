@@ -18,7 +18,7 @@ const accountSchema = new mongoose.Schema(
     },
     accountType: {
       type: String,
-      enum: ["Receivable", "Payable", "Capital", "Income", "Expense","Sales"],
+      enum: ["Receivable", "Payable","Bank", "Capital", "Income", "Expense","Sales"],
       required: true,
     },
     isActive: {

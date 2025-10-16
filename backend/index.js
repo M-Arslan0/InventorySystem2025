@@ -12,8 +12,11 @@ import db from "./dbConnection/dbConnection.js";
 //Controllers
 import customerController from "./controller/customerController.js";
 import accountController from "./controller/accountController.js";
-import miscController from "./controller/miscController.js";
 import ledgerController from "./controller/ledgerBookController.js";
+import voucherController from "./controller/voucherController.js";
+import bankController from "./controller/bankController.js";
+import miscController from "./controller/miscController.js";
+import subAccountController from "./controller/subAccountController.js";
 
 // Load environment variables
 dotenv.config();
@@ -32,7 +35,10 @@ app.use(morgan("dev")); // log requests
 //All routes
 app.use("/customer", customerController);
 app.use("/account", accountController);
+app.use("/subAccount", subAccountController);
+app.use("/voucher", voucherController);
 app.use("/ledgerBook", ledgerController);
+app.use("/bank", bankController);
 app.use("/misc", miscController);
 // Start the server
 app.listen(PORT, () => {

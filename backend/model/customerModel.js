@@ -49,7 +49,7 @@ const customerSchema = new mongoose.Schema(
         customerContactPerson3: {
             type: String
         },
-        customerLedgerAccount: {
+        ledgerAccount: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Account",
             required: true

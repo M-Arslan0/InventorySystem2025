@@ -1,27 +1,27 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { request } from "../util/fetchAPI";
 
-const fetchCustomerList = async () => {
-  const { data, status } = await request("/customer/getAllCustomers", "GET");
+const fetchUOMList = async () => {
+  const { data, status } = await request("/misc/getAllUOM", "GET");
   if (status !== 200) {
-    throw new Error(data?.message || "Failed to fetch customers");
+    throw new Error(data?.message || "Failed to fetch UOM list");
   }
   return data || [];
 };
 
-export default function useGetAllCustomers() {
+export default function useGetAllUOM() {
   const queryClient = useQueryClient();
 
   const {
-    data: customerData = [],
+    data: uomData = [],
     isLoading,
     isError,
     error,
-    refetch: fetchCustomers,
+    refetch: fetchUOMs,
     isFetching,
   } = useQuery({
-    queryKey: ["customers"],
-    queryFn: fetchCustomerList,
+    queryKey: ["uoms"],
+    queryFn: fetchUOMList,
     staleTime: 5 * 60 * 1000,
     cacheTime: 30 * 60 * 1000,
     refetchOnWindowFocus: false,
@@ -29,12 +29,12 @@ export default function useGetAllCustomers() {
   });
 
   return {
-    customerData,
+    uomData,
     isLoading,
     isError,
     error,
-    fetchCustomers,
+    fetchUOMs,
     isFetching,
-    invalidateCustomers: () => queryClient.invalidateQueries(["customers"]),
+    invalidateUOMs: () => queryClient.invalidateQueries(["uoms"]),
   };
 }

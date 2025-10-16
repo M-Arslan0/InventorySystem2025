@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
 import { request } from "../util/fetchAPI";
 
-export default function LedgerBookModal({ onClose, ledgerAccountId, ledgerAccountName, ledgerEntityType }) {
+export default function LedgerBookModal({ onClose, ledgerAccountId, ledgerAccountName }) {
   const [ledgerBookData, setLedgerBookData] = useState([]);
   const [calculatedLedger, setCalculatedLedger] = useState([]);
+
   // ✅ Fetch ledger data
   const fetchLedgerBook = async () => {
     try {
       const { data, status } = await request(
-        `/ledgerBook/getLedgerBy/${ledgerAccountId}?ledgerEntityType=${ledgerEntityType}`,
+        `/ledgerBook/getLedgerBy/${ledgerAccountId}`,
         "GET"
       );
       if (status === 200 && Array.isArray(data)) {
@@ -28,7 +29,7 @@ export default function LedgerBookModal({ onClose, ledgerAccountId, ledgerAccoun
         const isCredit = entry.transectionType?.toLowerCase() === "credit";
 
         // Credit increases balance, Debit decreases
-        runningBalance += isCredit ? -balanceAmount : +balanceAmount;
+        runningBalance += isCredit ? balanceAmount : -balanceAmount;
 
         return {
           ...entry,
@@ -90,7 +91,7 @@ export default function LedgerBookModal({ onClose, ledgerAccountId, ledgerAccoun
                 <thead>
                   <tr className="bg-gray-100">
                     <th>DATE</th>
-                    <th className="td-left">Ledger A/c</th>
+                    <th className="td-center">Ledger A/c</th>
                     <th className="td-center">Ledger Entity</th>
                     <th className="td-center">Particulars</th>
                     <th className="td-center">Ref. No</th>
@@ -103,18 +104,18 @@ export default function LedgerBookModal({ onClose, ledgerAccountId, ledgerAccoun
                 <tbody>
                   {calculatedLedger.map((data, i) => (
                     <tr key={i} className="hover:bg-gray-50">
-                      <td className="text-start w-10">
+                      <td className="text-start">
                         {new Date(data.ledgerDate).toLocaleDateString("en-GB")}
                       </td>
-                      <td className="td-left">{data.ledgerAccount?.accountName}</td>
+                      <td className="td-center">{data.ledgerAccount?.accountName}</td>
                       <td className="td-center">{data.ledgerEntityType}</td>
-                      <td className="td-center">{data?.referenceId?.voucherType}-{data?.referenceModel}</td>
+                      <td className="td-center">{data?.referenceModel}</td>
                       <td className="td-center">{data.referenceId?.voucherRefNo}</td>
                       <td className="td-center">{data.remarks}</td>
-                      <td className="td-center text-red-600">
+                      <td className="td-center text-green-600">
                         {data.credit ? data.credit.toFixed(2) : "0.00"}
                       </td>
-                      <td className="td-center text-green-600">
+                      <td className="td-center text-red-600">
                         {data.debit ? data.debit.toFixed(2) : "0.00"}
                       </td>
                       <td

@@ -1,13 +1,9 @@
 import ledgerBookModel from "../model/ledgerBookModel.js";
 
-const ledgerEntryUtil = async (ledgerData, session) => {
+const ledgerEntryUtil = async (ledgerDebitEntry, ledgerCreditEntry, session) => {
   try {
     // 🔹 Always insert as an array + session
-    const [ledgerBookEntry] = await ledgerBookModel.create(
-      [ledgerData],
-      { session }
-    );
-
+    const [ledgerBookEntry] = await ledgerBookModel.create([ledgerDebitEntry, ledgerCreditEntry], { session, ordered: true });
     if (!ledgerBookEntry) {
       throw new Error("Failed to create ledger entry");
     }

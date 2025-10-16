@@ -13,9 +13,7 @@ import useGetAllCusVenTypes from "../hooks/useGetAllCusVenTypes";
 import useGetAllCustomers from "../hooks/useGetAllCustomer";
 
 //Icons
-import {
-  FaCirclePlus,
-} from "react-icons/fa6";
+import { FaCirclePlus } from "react-icons/fa6";
 import { IoPerson } from "react-icons/io5";
 
 //Modals
@@ -49,6 +47,7 @@ export default function CustomerRegFormModal({ onClose }) {
 
   const onSubmit = async (payload) => {
     try {
+
       const { data, status } = await request("/customer/createCustomer", "POST", {
         "Content-Type": "application/json"
       }, { ...payload });
@@ -94,7 +93,7 @@ export default function CustomerRegFormModal({ onClose }) {
                     <label htmlFor="customerShippingAddress">Shipping Address</label>
                     <textarea {...register("customerShippingAddress")} cols="1" rows="3" placeholder="Customer Shipping Address" />
 
-                    <p>Opening Balance</p>
+                    <label htmlFor="customerOpeningBalance">OPENING BALANCE</label>
                     <input type="number" step="0.01" placeholder="Rs. 0.00" {...register("customerOpeningBalance")} style={{ width: "100%", textAlign: "right" }} />
                   </div>
 
@@ -144,7 +143,25 @@ export default function CustomerRegFormModal({ onClose }) {
                       isSearchable
                       isClearable
                     />
+                    <div className="mt-6">
+                      <label htmlFor="customerType" onClick={() => setIsAccountModalOpen(true)}>Default Opening Balance A/c<FaCirclePlus className="inline text-green-600" /></label>
+                      <ReactSelect
+                        options={accountData?.map((acc) => ({
+                          label: `${acc.accountName} | ${acc.accountNature} | ${acc.accountType}`,
+                          value: acc._id,
+                        })) || []}
+                        placeholder="Search or select account..."
+                        className="text-sm bg-white"
+                        onChange={(selectedOption) => setValue("customerOpeningBalanceAcc", selectedOption?.value)}
+                        isSearchable
+                        isClearable
+                        menuPortalTarget={document.body} // 👈 yahan magic
+                        styles={{
+                          menuPortal: (base) => ({ ...base, zIndex: 9999 }), // 👈 zIndex yahan set karo
+                        }}
+                      />
 
+                    </div>
                   </div>
                 </div>
               </div>
@@ -192,29 +209,23 @@ export default function CustomerRegFormModal({ onClose }) {
                     <input type="text" id="customerContactPerson3" {...register("customerContactPerson3")} className="bg-white" />
                   </div>
 
-                  <div>
-                    <label htmlFor="isActive">Status</label>
-                    <select {...register("isActive")} className="bg-white">
-                      <option value="true">Active</option>
-                      <option value="false">In-Active</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label htmlFor="ledgerAccount" onClick={() => setIsAccountModalOpen(true)}>Select Ledger A/c <FaCirclePlus className="inline text-green-600" /></label>
+                  <div className="col-span-2 z-50">
+                    <label htmlFor="ledgerAccount" onClick={() => setIsAccountModalOpen(true)}>Select Ledger A/c <FaCirclePlus className="inline text-green-600" />
+                    </label>
                     <ReactSelect
-                      options={
-                        accountData?.map((acc) => ({
-                          label: `${acc.accountName} | ${acc.accountNature} | ${acc.accountType}`, // visible text
-                          value: acc._id, // form me save hone wala value
-                        })) || []
-                      }
+                      options={accountData?.map((acc) => ({
+                        label: `${acc.accountName} | ${acc.accountNature} | ${acc.accountType}`,
+                        value: acc._id,
+                      })) || []}
                       placeholder="Search or select account..."
                       className="text-sm bg-white"
-                      onChange={(selectedOption) => {
-                        setValue("customerLedgerAccount", selectedOption?.value);
-                      }}
+                      onChange={(selectedOption) => setValue("ledgerAccount", selectedOption?.value)}
                       isSearchable
                       isClearable
+                      menuPortalTarget={document.body} // 👈 yahan magic
+                      styles={{
+                        menuPortal: (base) => ({ ...base, zIndex: 9999 }), // 👈 zIndex yahan set karo
+                      }}
                     />
 
                   </div>

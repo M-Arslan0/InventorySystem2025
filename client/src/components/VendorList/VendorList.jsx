@@ -94,15 +94,13 @@ const tabItems = [
 		<div className="w-[70%]">
 
 		  {/* Stats Cards */}
-		  <div>
-			  <CustomerCards />
-		  </div>
+		 {/* SW */}
 
 		  {/* Vendor Info */}
-		  <div>
+		{/*   <div>
 			<CustomerInfoCards />
 		  </div>
-
+ */}
 
 		  {/* Transaction Tabs (only one shown for brevity) */}
 			<div className="bg-black">

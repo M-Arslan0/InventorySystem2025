@@ -31,12 +31,7 @@ export default function CustomerInfoCards({customerInfo}) {
                       <strong>Ledger A/c</strong> {customerInfo.customerLedgerAccount?.accountName}
                     </p>
 
-                    <p>
-                      <strong>Status</strong> {customerInfo.isActive ? "Active" : "Inactive"}
-                      <a href="#">
-                        <i className="fa-regular fa-pen-to-square"></i> edit
-                      </a>
-                    </p>
+
                   </div>
                 </div>
                 <div className="card-icon-lg bg-gray">
