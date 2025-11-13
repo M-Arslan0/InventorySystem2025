@@ -186,8 +186,8 @@ miscController.get("/getAllUOM", async (req, res) => {
 // ✅ Create Packing Size
 miscController.post("/createPackingSize", async (req, res) => {
   try {
-    const { packingCode } = req.body;
-    const isExist = await packingSizeModel.findOne({ packingCode });
+    const { packingSizeCode } = req.body;
+    const isExist = await packingSizeModel.findOne({ packingSizeCode });
     if (isExist)
       return res.status(409).json({ message: "Packing Size with this code already exists" });
 

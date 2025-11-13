@@ -82,6 +82,7 @@ export default function AccountsFormModal({ onClose }) {
                   <label htmlFor="accountType">Type</label>
                   <select {...register("accountType", { required: true })}>
                     <option value="">Select Type</option>
+                    <option value="Stock">Stock</option>
                     <option value="Receivable">Receivable</option>
                     <option value="Payable">Payable</option>
                     <option value="Bank">Bank</option>

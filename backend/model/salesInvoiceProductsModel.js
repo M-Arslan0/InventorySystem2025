@@ -1,0 +1,37 @@
+// models/StockMovement.js
+import mongoose from "mongoose";
+
+const salesInvoiceProductsSchema = new mongoose.Schema(
+    {
+        salesInvId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "SalesInvoice",
+            required: [true, "Sales Invoice reference is required"],
+        },
+        productId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Product",
+            required: [true, "Product reference is required"],
+        },
+        productQty: {
+            type: Number,
+            required: [true, "Quantity is required"],
+            min: [0, "Quantity cannot be negative"],
+        },
+        productRate: {
+            type: Number,
+            required: [true, "Rate is required"],
+            min: [0, "Rate cannot be negative"],
+        },
+        productAmount: {
+            type: Number,
+            required: [true, "Amount is required"],
+            min: [0, "Amount cannot be negative"],
+        },
+    },
+    { timestamps: true }
+);
+
+
+
+export default mongoose.model("SalesInvoiceProducts", salesInvoiceProductsSchema);

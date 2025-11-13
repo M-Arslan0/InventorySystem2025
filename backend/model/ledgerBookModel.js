@@ -20,7 +20,7 @@ const LedgerBookSchema = new mongoose.Schema({
   ledgerEntityType: {
     type: String,
     required: true,
-    enum: ["Customer", "Bank", "SubAccount"],
+    enum: ["Customer", "Product", "Bank", "SubAccount"],
   },
   referenceId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -30,7 +30,7 @@ const LedgerBookSchema = new mongoose.Schema({
     referenceModel: {
     type: String,
     required: true,
-    enum: ["Voucher","Account"],
+    enum: ["Voucher","Account","Product", "SalesInvoice", "PurchaseInvoice"],
   },
   transectionType: {
     type: String,

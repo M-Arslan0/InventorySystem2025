@@ -145,7 +145,7 @@ export default function CustomerList() {
                   <tr className="bg-gray-100">
                     <th className="td-left py-2 px-3 border">#</th>
                     <th className="td-left py-2 px-3 border">Name</th>
-                    <th className="td-right py-2 px-3 border">Status</th>
+                    <th className="td-center py-2 px-3 border">Status</th>
                     <th className="td-center py-2 px-3 border"></th>
                   </tr>
                 </thead>

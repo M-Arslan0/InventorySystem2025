@@ -22,7 +22,7 @@ accountController.post("/createAccount", async (req, res) => {
 accountController.get("/getAllAccounts", async (req, res) => {
   try {
     const accounts = await accountModel.find();
-    res.status(200).json({ accounts });
+    res.status(200).json(accounts);
   } catch (error) {
     console.error("Error fetching accounts:", error);
     res.status(500).json({ message: "Internal server error" });

@@ -6,7 +6,7 @@ const fetchAccountList = async () => {
   if (status !== 200) {
     throw new Error(data?.message || "Failed to fetch accounts");
   }
-  return data.accounts || [];
+  return data || [];
 };
 
 export default function useGetAllAccounts() {

@@ -1,4 +1,9 @@
 import { useState } from "react";
+import ReactSelect from "react-select";
+// Hooks
+import useGetAllBrands from "../../hooks/useGetAllBrand";
+import useGetAllCategories from "../../hooks/useGetAllCategories";
+import useGetAllProducts from "../../hooks/useGetAllProducts";
 //Icons
 import {
   FaMagnifyingGlass,
@@ -10,8 +15,8 @@ import {
   FaPenNib,
   FaSliders,
 } from "react-icons/fa6";
-import { FaExclamationTriangle,FaClipboardList } from "react-icons/fa";
-//Modals
+import { FaExclamationTriangle, FaClipboardList } from "react-icons/fa";
+// Modals
 import ProductRegFormModal from "../../modals/ProductRegFromModal";
 import BrandFormModal from "../../modals/BrandFormModal";
 import CategoryFormModal from "../../modals/CategoryFormModal";
@@ -20,51 +25,65 @@ import ProductPriceUpdateFormModal from "../../modals/ProductPriceUpdateFormModa
 import StockAdjFormModal from "../../modals/StockAdjFormModal";
 
 
-export default function InventoryList({
-  onUpdatePrices,
-  onStockAdjustment,
-}) {
-
-    // 📌 All States
-    const [isProductModalOpen, setIsProductModalOpen] = useState(false)
-    const [isBrandModalOpen, setIsBrandModalOpen] = useState(false)
-    const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false)
-    const [isProductPriceUpdateListModalOpen, setIsProductPriceUpdateListModalOpen] = useState(false)
-    const [isProductPriceUpdateFormModalOpen, setIsProductPriceUpdateFormModalOpen] = useState(false)
-    const [isStockAdjFormModalOpen, setIsStockAdjFormModalOpen] = useState(false)
+export default function InventoryList() {
+  //Hooks
+  const { products, refetchProduct, isLoading } = useGetAllProducts();
+  const { brandData = [] } = useGetAllBrands();
+  const { categoryData = [] } = useGetAllCategories();
+  //Modal
+  const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+  const [isBrandModalOpen, setIsBrandModalOpen] = useState(false);
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [isProductPriceUpdateListModalOpen, setIsProductPriceUpdateListModalOpen] = useState(false);
+  const [isProductPriceUpdateFormModalOpen, setIsProductPriceUpdateFormModalOpen] = useState(false);
+  const [isStockAdjFormModalOpen, setIsStockAdjFormModalOpen] = useState(false);
+  //Search
+  const [search, setSearch] = useState("");
+  const [selectedBrand, setSelectedBrand] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
 
   // 📌 Page Menu Config
   const pageMenu = [
-    { label: "Add New Item", icon: FaBoxArchive, onClick: () => setIsProductModalOpen(true)},
+    { label: "Add New Item", icon: FaBoxArchive, onClick: () => setIsProductModalOpen(true) },
     { label: "Add Brand", icon: FaBeerMugEmpty, onClick: () => setIsBrandModalOpen(true) },
     { label: "Add Category", icon: FaDolly, onClick: () => setIsCategoryModalOpen(true) },
     { label: "Update Prices", icon: FaPenNib, onClick: () => setIsProductPriceUpdateFormModalOpen(true) },
     { label: "Update Prices List", icon: FaClipboardList, onClick: () => setIsProductPriceUpdateListModalOpen(true) },
-    { label: "Stock Adjustment", icon: FaSliders,onClick: () => setIsStockAdjFormModalOpen(true) },
+    { label: "Stock Adjustment", icon: FaSliders, onClick: () => setIsStockAdjFormModalOpen(true) },
   ];
 
-  // 📌 Stock Summary Config
-  const stockCards = [
-    { title: "Low Stock", value: 150, icon: FaExclamationTriangle, color: "text-orange-500" },
-    { title: "Out of Stock", value: 150, icon: FaHourglass, color: "text-green-600" },
-    { title: "Wrong Price", value: 16, icon: FaDownLong, color: "text-pink-500" },
-    { title: "Dead Stock", value: 418, icon: FaExclamationTriangle, color: "text-purple-600" },
-  ];
 
-  // 📌 Table Data Config
-  const tableData = [
-    { cord: "DRSP-246", name: "DOLLAR Stapler Pin 24/6", cost: "VP", wholesale: "Rs. 60.00", retail: "Rs. 70.00", stock: 328 },
-    { cord: "DXSP-246", name: "DUX Stapler Pin 24/6", cost: "#B", wholesale: "Rs. 55.00", retail: "Rs. 60.00", stock: 1380 },
-    { cord: "DRSP-246", name: "DOLLAR Stapler Pin 24/6", cost: "CZ", wholesale: "Rs. 60.00", retail: "Rs. 70.00", stock: 670 },
-  ];
+const lowStockCount = products
+  ? products.filter(p => p.currentQty <= p.minQty).length
+  : "--";
 
-  // 📌 Out of Stock Items
-  const outOfStockItems = [
-    { name: "ORO Lead Pencil 512", qty: 27 },
-    { name: "ORO Lead Pencil 512", qty: 27 },
-    { name: "ORO Lead Pencil 512", qty: 27 },
-    { name: "ORO Lead Pencil 512", qty: 27 },
-  ];
+const outOfStockCount = products
+  ? products.filter(p => p.currentQty <= 0).length
+  : "--";
+
+const stockCards = [
+  { title: "Low Stock", value: lowStockCount, icon: FaExclamationTriangle, color: "text-orange-500" },
+  { title: "Out of Stock", value: outOfStockCount, icon: FaHourglass, color: "text-green-600" },
+  { title: "Wrong Price", value: "--", icon: FaDownLong, color: "text-pink-500" },
+  { title: "Dead Stock", value: "--", icon: FaExclamationTriangle, color: "text-purple-600" },
+];
+
+const filteredProducts = products.filter((p) => {
+  const matchesSearch =
+    p.productName?.toLowerCase().includes(search.toLowerCase()) ||
+    p.productCode?.toLowerCase().includes(search.toLowerCase());
+
+  // handle populated object or plain id
+  const productBrandId = typeof p.brandId === "object" ? p.brandId?._id : p.brandId;
+  const productCategoryId = typeof p.categoryId === "object" ? p.categoryId?._id : p.categoryId;
+
+  const matchesBrand = selectedBrand ? productBrandId === selectedBrand : true;
+  const matchesCategory = selectedCategory ? productCategoryId === selectedCategory : true;
+
+  return matchesSearch && matchesBrand && matchesCategory;
+});
+
+
 
   return (
     <div className="w-full">
@@ -93,56 +112,72 @@ export default function InventoryList({
         <div className="col-span-2 cards">
           <div className="card data-entery min-h-[85vh] p-2 bg-white shadow rounded">
             {/* Search Header */}
-            <div className="data-entery-header flex gap-2">
-              <label>Search products</label>
-              <input type="search" className="bg-white" />
-              <button className="flex items-center justify-center">
-                <FaMagnifyingGlass />
+            <div className="flex gap-2 mb-4">
+              <input
+                type="search"
+                placeholder="Search Products"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="border rounded-lg p-2 flex-1 shadow-sm focus:ring-2 focus:ring-blue-300"
+              />
+
+              <ReactSelect
+                options={brandData.map(d => ({ label: d.brandName, value: d._id }))}
+                placeholder="Brand"
+                className="w-40"
+                onChange={e => setSelectedBrand(e?.value || "")}
+                isClearable
+              />
+              <ReactSelect
+                options={categoryData.map(d => ({ label: d.categoryName, value: d._id }))}
+                placeholder="Category"
+                className="w-40"
+                onChange={e => setSelectedCategory(e?.value || "")}
+                isClearable
+              />
+              <button className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 "
+                onClick={() => refetchProduct()}>
+                Refresh
               </button>
-              <button>RESET</button>
-
-              <select className="bg-white">
-                <option>CATEGORY</option>
-                <option>Category -1</option>
-                <option>Category -2</option>
-                <option>Category -3</option>
-                <option>Category -4</option>
-              </select>
-
-              <select className="bg-white">
-                <option>BRAND</option>
-                <option>Brand -1</option>
-                <option>Brand -2</option>
-                <option>Brand -3</option>
-                <option>Brand -4</option>
-              </select>
+              <button
+                onClick={() => {
+                  setSearch("");
+                  setSelectedBrand("");
+                  setSelectedCategory("");
+                }}
+                className="px-3 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
+              >
+                RESET
+              </button>
             </div>
 
             {/* Table */}
-            <table className="w-full border">
-              <thead className="bg-gray-100">
-                <tr>
-                  <th>CODE</th>
-                  <th>ITEM NAME</th>
-                  <th className="text-center">COST</th>
-                  <th className="text-right">WHOLESALE</th>
-                  <th className="text-right">RETAIL</th>
-                  <th className="text-center">IN HAND</th>
-                </tr>
-              </thead>
-              <tbody>
-                {tableData.map((row, idx) => (
-                  <tr key={idx}>
-                    <td>{row.cord}</td>
-                    <td>{row.name}</td>
-                    <td className="text-center">{row.cost}</td>
-                    <td className="text-right">{row.wholesale}</td>
-                    <td className="text-right">{row.retail}</td>
-                    <td className="text-center">{row.stock}</td>
+            {isLoading ? (
+              <p>Loading...</p>
+            ) : (
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-gray-100">
+                    {["CODE", "PRODUCT NAME", "COST", "SP RATE", "WHOLE SALE", "RETAIL", "In-Hand"].map((h, i) => (
+                      <th key={i} className="p-2 text-sm font-medium">{h}</th>
+                    ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {filteredProducts.map((data, i) => (
+                    <tr key={i} className="hover:bg-gray-50">
+                      <td className="p-2">{data.productCode}</td>
+                      <td className="p-2 w-[30%]">{data.productName}</td>
+                      <td className="p-2 text-center">{data.productCost.toFixed(2)}</td>
+                      <td className="p-2 text-center">{data.productSpRate.toFixed(2)}</td>
+                      <td className="p-2 text-center">{data.productWhRate.toFixed(2)}</td>
+                      <td className="p-2 text-center">{data.productRtRate.toFixed(2)}</td>
+                      <td className="p-2 text-center">{data.currentQty}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         </div>
 
@@ -174,10 +209,10 @@ export default function InventoryList({
               </div>
               <table className="w-full border">
                 <tbody>
-                  {outOfStockItems.map((item, idx) => (
+                  {products.filter((data)=>data.currentQty <=  0).map((item, idx) => (
                     <tr key={idx}>
-                      <td>{item.name}</td>
-                      <td>{item.qty}</td>
+                      <td>{item.productName}</td>
+                      <td>{item.currentQty}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -187,34 +222,34 @@ export default function InventoryList({
         </div>
       </div>
       {isProductModalOpen &&
-      <ProductRegFormModal
-      onClose={()=>setIsProductModalOpen(false)}
-      />}
+        <ProductRegFormModal
+          onClose={() => setIsProductModalOpen(false)}
+        />}
 
       {isBrandModalOpen &&
-      <BrandFormModal
-      onClose={()=>setIsBrandModalOpen(false)}
-      />}
+        <BrandFormModal
+          onClose={() => setIsBrandModalOpen(false)}
+        />}
 
       {isCategoryModalOpen &&
-      <CategoryFormModal
-      onClose={()=>setIsCategoryModalOpen(false)}
-      />}
+        <CategoryFormModal
+          onClose={() => setIsCategoryModalOpen(false)}
+        />}
 
       {isProductPriceUpdateListModalOpen &&
-      <ProductPriceUpdateListModal
-      onClose={()=>setIsProductPriceUpdateListModalOpen(false)}
-      />}
+        <ProductPriceUpdateListModal
+          onClose={() => setIsProductPriceUpdateListModalOpen(false)}
+        />}
 
       {isProductPriceUpdateFormModalOpen &&
-      <ProductPriceUpdateFormModal
-      onClose={()=>setIsProductPriceUpdateFormModalOpen(false)}
-      />}
+        <ProductPriceUpdateFormModal
+          onClose={() => setIsProductPriceUpdateFormModalOpen(false)}
+        />}
 
       {isStockAdjFormModalOpen &&
-      <StockAdjFormModal
-      onClose={()=>setIsStockAdjFormModalOpen(false)}
-      />}
+        <StockAdjFormModal
+          onClose={() => setIsStockAdjFormModalOpen(false)}
+        />}
     </div>
   );
 }

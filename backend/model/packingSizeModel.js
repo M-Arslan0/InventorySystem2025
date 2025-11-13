@@ -11,7 +11,6 @@ const packingSizeSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
-      unique: true,
     },
     isActive: {
       type: Boolean,
