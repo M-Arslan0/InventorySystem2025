@@ -39,7 +39,7 @@ customerController.post("/createCustomer", async (req, res) => {
 
     //-------------------Voucher Entry ------------------
     const voucherData = {
-      ledgerDate: new Date(),
+      voucherDate: new Date(),
       voucherRefNo: "Vouc-11",
       voucherType: "Journal",
       narration: "Customer Opening Balance",

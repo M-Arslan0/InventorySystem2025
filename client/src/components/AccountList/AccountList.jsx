@@ -1,12 +1,19 @@
 import { useState, useEffect } from "react";
 import { FaEllipsisV, FaEdit, FaTrash, FaEye, FaPrint, FaSync } from "react-icons/fa";
+//Modal
+import LedgerBookModal from "../../modals/LedgerBookModal";
+//Hooks
 import useGetAllAccounts from "../../hooks/useGetAllAccounts";
+import { FaBook } from "react-icons/fa";
 
 export default function AccountListAccountsManagement() {
   const { accountData = [], fetchAccounts, isLoading, error } = useGetAllAccounts();
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredAccounts, setFilteredAccounts] = useState([]);
+  const [accInfo, setAccInfo] = useState("");
   const [openMenuId, setOpenMenuId] = useState(null); // 🔹 Track which row menu is open
+  // Modal states
+  const [ledgerBookModalOpen, setLedgerBookModalOpen] = useState(false);
 
   // 🔍 Filter accounts on search
   useEffect(() => {
@@ -64,13 +71,13 @@ export default function AccountListAccountsManagement() {
           <table className="w-full border-collapse text-sm relative">
             <thead>
               <tr className="bg-gray-100 text-[#004d4d] font-semibold border-b">
-                <th className="td-left py-2 px-3 border">#</th>
-                <th className="td-left py-2 px-3 border">Name</th>
-                <th className="td-center py-2 px-3 border">Description</th>
-                <th className="td-center py-2 px-3 border">Type</th>
-                <th className="td-center py-2 px-3 border">Nature</th>
-                <th className="td-center py-2 px-3 border">Status</th>
-                <th className="td-center py-2 px-3 border"></th>
+                <th className="w-[3%] text-left py-2 px-3 border">#</th>
+                <th className="w-[45%] text-left py-2 px-3 border">Name</th>
+                <th className="w-[30%] text-left py-2 px-3 border">Description</th>
+                <th className="w-[5%] text-center py-2 px-3 border">Type</th>
+                <th className="w-[5%] text-center py-2 px-3 border">Nature</th>
+                <th className="w-[5%] text-center py-2 px-3 border">Status</th>
+                <th className="w-[2%] text-center py-2 px-3 border"></th>
               </tr>
             </thead>
 
@@ -81,18 +88,17 @@ export default function AccountListAccountsManagement() {
                     key={data._id}
                     className="hover:bg-[#f9f9f9] transition-all border-b relative"
                   >
-                    <td className="td-left py-2 px-3">{index + 1}</td>
-                    <td className="td-left py-2 px-3 font-semibold">{data.accountName}</td>
-                    <td className="td-center py-2 px-3">{data.accountDescription}</td>
-                    <td className="td-center py-2 px-3">{data.accountType}</td>
-                    <td className="td-center py-2 px-3">{data.accountNature}</td>
-                    <td className="td-center py-2 px-3">
+                    <td className="text-left py-2 px-3">{index + 1}</td>
+                    <td className="text-left py-2 px-3 font-semibold">{data.accountName}</td>
+                    <td className="text-left py-2 px-3">{data.accountDescription}</td>
+                    <td className="text-center py-2 px-3">{data.accountType}</td>
+                    <td className="text-center py-2 px-3">{data.accountNature}</td>
+                    <td className="text-center py-2 px-3">
                       <span
-                        className={`px-2 py-1 rounded text-xs font-semibold ${
-                          data.isActive
+                        className={`px-2 py-1 rounded text-xs font-semibold ${data.isActive
                             ? "bg-green-100 text-green-700"
                             : "bg-red-100 text-red-700"
-                        }`}
+                          }`}
                       >
                         {data.isActive ? "Active" : "Inactive"}
                       </span>
@@ -111,6 +117,12 @@ export default function AccountListAccountsManagement() {
                       {/* 🔽 Dropdown Menu */}
                       {openMenuId === data._id && (
                         <div className="absolute right-8 top-8 bg-white border rounded-md shadow-md z-50 w-32 text-left animate-fadeIn">
+                          <button
+                            className="flex items-center gap-2 w-full px-3 py-2 hover:bg-gray-100 text-sm"
+                            onClick={() => { setLedgerBookModalOpen(true); setAccInfo(data); }}
+                          >
+                            <FaBook className="text-blue-500" /> Ledger
+                          </button>
                           <button
                             className="flex items-center gap-2 w-full px-3 py-2 hover:bg-gray-100 text-sm"
                             onClick={() => console.log("Preview", data)}
@@ -151,6 +163,13 @@ export default function AccountListAccountsManagement() {
           </table>
         )}
       </div>
+      {ledgerBookModalOpen && (
+              <LedgerBookModal
+                onClose={() => setLedgerBookModalOpen(false)}
+                ledgerAccountId={accInfo._id}
+                ledgerAccountName={accInfo.accountName}
+              />
+            )}
     </div>
   );
 }

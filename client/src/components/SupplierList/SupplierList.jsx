@@ -1,90 +1,89 @@
 import { useState, useEffect } from "react";
 //Cards
-import CustomerCards from "../CustomerCards/CustomerCards";
-import CustomerInfoCards from "../CustomerCards/CustomerInfoCards";
+import SupplierCards from "../SupplierCards/SupplierCards";
+import SupplierInfoCards from "../SupplierCards/SupplierInfoCards";
 
 //Modal
-import CustomerRegFormModal from "../../modals/CustomerRegFormModal";
+import SupplierRegFormModal from "../../modals/SupplierRegFormModal";
 import LedgerBookModal from "../../modals/LedgerBookModal";
-import PaymentRecevingModal from "../../modals/PaymentRecevingModal";
-import CustomerReturnModal from "../../modals/CustomerReturnModal";
+import PaymentGivingModal from "../../modals/PaymentGivingModal";
+import SupplierReturnModal from "../../modals/SupplierReturnModal";
 
 //Hooks
-import useGetAllCustomers from "../../hooks/useGetAllCustomer";
+import useGetAllSuppliers from "../../hooks/useGetAllSuppliers";
 
 //Icons
 import { IoMdPersonAdd } from "react-icons/io";
 import { FaCreditCard, FaRotateLeft } from "react-icons/fa6"
 import { FaSync, FaEllipsisV, FaFolderOpen, FaTrash, FaEye, FaEdit, FaPrint } from "react-icons/fa";
 
-export default function CustomerList() {
-  const { customerData, isLoading, error, fetchCustomers } = useGetAllCustomers();
-  const [customerInfo, setCustomerInfo] = useState("");
-  const [filteredCustomers, setFilteredCustomers] = useState([]);
+export default function SupplierList() {
+  const { supplierData, isLoading, error, fetchSuppliers } = useGetAllSuppliers();
+  const [supplierInfo, setSupplierInfo] = useState("");
+  const [filteredSuppliers, setFilteredSuppliers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [openMenuId, setOpenMenuId] = useState(null);
 
   // Modal states
-  const [custumerRegModalOpen, setCustumerRegModalOpen] = useState(false);
+  const [supplierRegModalOpen, setSupplierRegModalOpen] = useState(false);
   const [ledgerBookModalOpen, setLedgerBookModalOpen] = useState(false);
-  const [paymentRecevingModalOpen, setPaymentRecevingModalOpen] = useState(false);
-  const [customerReturnModalOpen, setCustomerReturnModalOpen] = useState(false);
+  const [paymentGivingModalOpen, setPaymentGivingModalOpen] = useState(false);
+  const [supplierReturnModalOpen, setSupplierReturnModalOpen] = useState(false);
 
   const actionButtons = [
     {
-      label: "New Customer",
+      label: "New Supplier",
       icon: <IoMdPersonAdd className="text-lg" />,
-      onClick: () => setCustumerRegModalOpen(true),
+      onClick: () => setSupplierRegModalOpen(true),
       disabled: false,
     },
     {
       label: "Ledger",
       icon: <FaFolderOpen className="text-lg" />,
       onClick: () => setLedgerBookModalOpen(true),
-      disabled: !customerInfo,
+      disabled: !supplierInfo,
     },
     {
       label: "Payments",
       icon: <FaCreditCard className="text-lg" />,
-      onClick: () => setPaymentRecevingModalOpen(true),
-      disabled: !customerInfo,
+      onClick: () => setPaymentGivingModalOpen(true),
+      disabled: !supplierInfo,
     },
     {
       label: "Return Items",
       icon: <FaRotateLeft className="text-lg" />,
-      onClick: () => setCustomerReturnModalOpen(true),
+      onClick: () => setSupplierReturnModalOpen(true),
       disabled: false,
     },
   ];
 
-  // 🔹 Toggle menu for specific row
   const toggleMenu = (id) => {
     setOpenMenuId(openMenuId === id ? null : id);
   };
 
-  useEffect(() => setFilteredCustomers(customerData), [customerData]);
+  useEffect(() => setFilteredSuppliers(supplierData), [supplierData]);
   useEffect(() => {
-    const filtered = customerData.filter((c) =>
-      c.customerName.toLowerCase().includes(searchTerm.toLowerCase())
+    const filtered = supplierData.filter((s) =>
+      s.supplierName.toLowerCase().includes(searchTerm.toLowerCase())
     );
-    setFilteredCustomers(filtered);
-  }, [searchTerm, customerData]);
+    setFilteredSuppliers(filtered);
+  }, [searchTerm, supplierData]);
 
   return (
     <div className="w-full">
       {/* Header Menu */}
       <div className="p-[1px] bg-[#d1e0e0] border-b-2 border-[#94b8b8] mb-3 flex items-center">
         <div className="w-[20%] p-2">
-          <h2 className="font-bold text-[#004d4d]">CUSTOMERS</h2>
+          <h2 className="font-bold text-[#004d4d]">SUPPLIERS</h2>
         </div>
 
         <div className="flex justify-start items-center gap-3">
           {actionButtons.map((btn, index) => {
             const isActive =
-              (btn.label === "New Customer" && custumerRegModalOpen) ||
+              (btn.label === "New Supplier" && supplierRegModalOpen) ||
               (btn.label === "Ledger" && ledgerBookModalOpen) ||
-              (btn.label === "Payments" && paymentRecevingModalOpen) ||
-              (btn.label === "Return Items" && customerReturnModalOpen);
+              (btn.label === "Payments" && paymentGivingModalOpen) ||
+              (btn.label === "Return Items" && supplierReturnModalOpen);
 
             return (
               <div key={index} className="flex items-center gap-2">
@@ -110,11 +109,11 @@ export default function CustomerList() {
 
       {/* Layout */}
       <div className="flex justify-between">
-        {/* Customer Table */}
+        {/* Supplier Table */}
         <div className="w-[40%] cards p-2">
           <div className="card" style={{ minHeight: "75vh" }}>
             <div className="flex items-center justify-between mb-3">
-              <h2 className="card-title-info">Customer List</h2>
+              <h2 className="card-title-info">Supplier List</h2>
               <div className="flex items-center gap-2">
                 <div className="relative">
                   <input
@@ -124,11 +123,10 @@ export default function CustomerList() {
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
-
                 </div>
                 <button
                   className="px-3 py-1 bg-[#006666] text-white rounded flex items-center gap-1 text-sm hover:bg-[#004d4d]"
-                  onClick={fetchCustomers}
+                  onClick={fetchSuppliers}
                 >
                   <FaSync /> Refresh
                 </button>
@@ -150,67 +148,56 @@ export default function CustomerList() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredCustomers.length > 0 ? (
-                    filteredCustomers.map((customer, index) => (
+                  {filteredSuppliers.length > 0 ? (
+                    filteredSuppliers.map((supplier, index) => (
                       <tr
-                        key={customer._id}
-                        className={`relative transition-all border-b ${customer._id === customerInfo._id ? "bg-[#f9facd]" : "hover:bg-gray-50"
+                        key={supplier._id}
+                        className={`relative transition-all border-b ${supplier._id === supplierInfo._id ? "bg-[#f9facd]" : "hover:bg-gray-50"
                           }`}
-                        onClick={() => !customerInfo ? setCustomerInfo(customer) : setCustomerInfo("")}
+                        onClick={() =>
+                          !supplierInfo
+                            ? setSupplierInfo(supplier)
+                            : setSupplierInfo("")
+                        }
                       >
                         <td className="py-2 px-3 text-center">{index + 1}</td>
-                        <td
-                          className="py-2 px-3 cursor-pointer"
 
-                        >
-                          {customer.customerName}
+                        <td className="py-2 px-3 cursor-pointer">
+                          {supplier.supplierName}
                         </td>
+
                         <td className="text-center py-2 px-3">
                           <span
-                            className={`px-2 py-1 rounded text-xs font-semibold ${customer.isActive
+                            className={`px-2 py-1 rounded text-xs font-semibold ${supplier.isActive
                                 ? "bg-green-100 text-green-700"
                                 : "bg-red-100 text-red-700"
                               }`}
                           >
-                            {customer.isActive ? "Active" : "Inactive"}
+                            {supplier.isActive ? "Active" : "Inactive"}
                           </span>
                         </td>
 
-                        {/* Burger Menu */}
                         <td
                           className="td-center py-2 px-3 text-[#004d4d] relative"
                           onClick={(e) => {
-                            e.stopPropagation(); // prevent closing immediately
-                            toggleMenu(customer._id);
+                            e.stopPropagation();
+                            toggleMenu(supplier._id);
                           }}
                         >
                           <FaEllipsisV className="cursor-pointer text-gray-600 hover:text-[#004d4d]" />
 
-                          {/* 🔽 Dropdown Menu */}
-                          {openMenuId === customer._id && (
+                          {openMenuId === supplier._id && (
                             <div className="absolute right-8 top-8 bg-white border rounded-md shadow-md z-50 w-32 text-left animate-fadeIn">
-                              <button
-                                className="flex items-center gap-2 w-full px-3 py-2 hover:bg-gray-100 text-sm"
-                                onClick={() => console.log("Preview", customer)}
-                              >
+                              <button className="flex items-center gap-2 w-full px-3 py-2 hover:bg-gray-100 text-sm">
                                 <FaEye className="text-blue-500" /> Preview
                               </button>
-                              <button
-                                className="flex items-center gap-2 w-full px-3 py-2 hover:bg-gray-100 text-sm"
-                                onClick={() => console.log("Edit", customer)}
-                              >
+                              <button className="flex items-center gap-2 w-full px-3 py-2 hover:bg-gray-100 text-sm">
                                 <FaEdit className="text-green-500" /> Edit
                               </button>
-                              <button
-                                className="flex items-center gap-2 w-full px-3 py-2 hover:bg-gray-100 text-sm"
-                                onClick={() => console.log("Delete", customer._id)}
-                              >
+                              <button className="flex items-center gap-2 w-full px-3 py-2 hover:bg-gray-100 text-sm">
                                 <FaTrash className="text-red-500" /> Delete
                               </button>
-                              <button
-                                className="flex items-center gap-2 w-full px-3 py-2 hover:bg-gray-100 text-sm"
-                                onClick={() => console.log("Print", data)}
-                              >
+                              <button className="flex items-center gap-2 w-full px-3 py-2 hover:bg-gray-100 text-sm">
                                 <FaPrint className="text-gray-500" /> Print
                               </button>
                             </div>
@@ -221,7 +208,7 @@ export default function CustomerList() {
                   ) : (
                     <tr>
                       <td colSpan="4" className="text-center py-3 text-gray-500">
-                        No customers found
+                        No suppliers found
                       </td>
                     </tr>
                   )}
@@ -233,31 +220,34 @@ export default function CustomerList() {
 
         {/* Right Info Panel */}
         <div className="w-[70%]">
-          <CustomerCards totalCustomers={customerData.length} />
-          <CustomerInfoCards customerInfo={customerInfo} />
+          <SupplierCards totalSuppliers={supplierData.length} />
+          <SupplierInfoCards supplierInfo={supplierInfo} />
         </div>
       </div>
 
       {/* Modals */}
-      {custumerRegModalOpen && (
-        <CustomerRegFormModal onClose={() => setCustumerRegModalOpen(false)} />
+      {supplierRegModalOpen && (
+        <SupplierRegFormModal onClose={() => setSupplierRegModalOpen(false)} />
       )}
+
       {ledgerBookModalOpen && (
         <LedgerBookModal
           onClose={() => setLedgerBookModalOpen(false)}
-          ledgerAccountId={customerInfo._id}
-          ledgerAccountName={customerInfo.customerName}
-          ledgerEntityType="Customer"
+          ledgerAccountId={supplierInfo._id}
+          ledgerAccountName={supplierInfo.supplierName}
+          ledgerEntityType="Supplier"
         />
       )}
-      {paymentRecevingModalOpen && (
-        <PaymentRecevingModal
-          onClose={() => setPaymentRecevingModalOpen(false)}
-          customerId={customerInfo._id}
+
+      {paymentGivingModalOpen && (
+        <PaymentGivingModal
+          onClose={() => setPaymentGivingModalOpen(false)}
+          supplierId={supplierInfo._id}
         />
       )}
-      {customerReturnModalOpen && (
-        <CustomerReturnModal onClose={() => setCustomerReturnModalOpen(false)} />
+
+      {supplierReturnModalOpen && (
+        <SupplierReturnModal onClose={() => setSupplierReturnModalOpen(false)} />
       )}
     </div>
   );

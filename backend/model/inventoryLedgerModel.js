@@ -10,7 +10,7 @@ const inventoryLedgerSchema = new mongoose.Schema(
         },
         refType: {
             type: String,
-            enum: ["Purchase", "SalesInvoice", "Adjustment", "Return", "Opening"],
+            enum: ["PurchaseInvoice", "SalesInvoice", "Adjustment", "Return", "Opening"],
             required: true,
         },
         refId: {

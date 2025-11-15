@@ -7,7 +7,7 @@ import useGetAllBank from "../../hooks/useGetAllBank";
 
 //Icons
 import { FaEllipsisV, FaEdit, FaTrash, FaEye, FaPrint, FaSync } from "react-icons/fa";
-
+import { FaBook } from "react-icons/fa";
 export default function BankList() {
   const { bankData = [], fetchBanks, isLoading, error } = useGetAllBank();
   const [bankInfo, setBankInfo] = useState("");
@@ -74,15 +74,15 @@ export default function BankList() {
           <table className="w-full border-collapse text-sm relative">
             <thead>
               <tr className="bg-gray-100 text-[#004d4d] font-semibold border-b">
-                <th className="td-left py-2 px-3 border">#</th>
-                <th className="td-left py-2 px-3 border">Bank Name</th>
-                <th className="td-center py-2 px-3 border">Branch Code</th>
-                <th className="td-left py-2 px-3 border">A/c Title</th>
-                <th className="td-center py-2 px-3 border">A/c Number</th>
-                <th className="td-center py-2 px-3 border">Bank IBAN</th>
-                <th className="td-center py-2 px-3 border">Ledger A/c</th>
-                <th className="td-center py-2 px-3 border">Status</th>
-                <th className="td-center py-2 px-3 border"></th>
+                <th className="text-left py-2 px-3 border">#</th>
+                <th className="text-left py-2 px-3 border">Bank Name</th>
+                <th className="text-center py-2 px-3 border">Branch Code</th>
+                <th className="text-left py-2 px-3 border">A/c Title</th>
+                <th className="text-center py-2 px-3 border">A/c Number</th>
+                <th className="text-center py-2 px-3 border">Bank IBAN</th>
+                <th className="text-center py-2 px-3 border">Ledger A/c</th>
+                <th className="text-center py-2 px-3 border">Status</th>
+                <th className="text-center py-2 px-3 border"></th>
               </tr>
             </thead>
 
@@ -93,18 +93,18 @@ export default function BankList() {
                     key={data._id}
                     className="hover:bg-[#f9f9f9] transition-all border-b relative"
                   >
-                    <td className="td-left py-2 px-3">{index + 1}</td>
-                    <td className="td-left py-2 px-3 font-semibold">{data.bankName}</td>
-                    <td className="td-center py-2 px-3">{data.bankBranchCode}</td>
-                    <td className="td-left py-2 px-3">{data.accountTitle}</td>
-                    <td className="td-center py-2 px-3">{data.accountNumber}</td>
-                    <td className="td-center py-2 px-3">{data.bankIBAN}</td>
-                    <td className="td-center py-2 px-3">{data.ledgerAccount?.accountName} | {data.ledgerAccount?.accountNature} | {data.ledgerAccount?.accountType}</td>
+                    <td className="text-left py-2 px-3">{index + 1}</td>
+                    <td className="text-left py-2 px-3 font-semibold">{data.bankName}</td>
+                    <td className="text-center py-2 px-3">{data.bankBranchCode}</td>
+                    <td className="text-left py-2 px-3">{data.accountTitle}</td>
+                    <td className="text-center py-2 px-3">{data.accountNumber}</td>
+                    <td className="text-center py-2 px-3">{data.bankIBAN}</td>
+                    <td className="text-center py-2 px-3">{data.ledgerAccount?.accountName} | {data.ledgerAccount?.accountNature} | {data.ledgerAccount?.accountType}</td>
                     <td className="td-center py-2 px-3">
                       <span
                         className={`px-2 py-1 rounded text-xs font-semibold ${data.isActive
-                            ? "bg-green-100 text-green-700"
-                            : "bg-red-100 text-red-700"
+                          ? "bg-green-100 text-green-700"
+                          : "bg-red-100 text-red-700"
                           }`}
                       >
                         {data.isActive ? "Active" : "Inactive"}
@@ -126,9 +126,9 @@ export default function BankList() {
                         <div className="absolute right-8 top-8 bg-white border rounded-md shadow-md z-50 w-32 text-left animate-fadeIn">
                           <button
                             className="flex items-center gap-2 w-full px-3 py-2 hover:bg-gray-100 text-sm"
-                            onClick={() => {setLedgerBookModalOpen(true); setBankInfo(data);}}
+                            onClick={() => { setLedgerBookModalOpen(true); setBankInfo(data); }}
                           >
-                            <FaEye className="text-blue-500" /> Ledger
+                            <FaBook className="text-blue-500" /> Ledger
                           </button>
                           <button
                             className="flex items-center gap-2 w-full px-3 py-2 hover:bg-gray-100 text-sm"
@@ -170,14 +170,14 @@ export default function BankList() {
           </table>
         )}
       </div>
-        {ledgerBookModalOpen && (
-              <LedgerBookModal
-                onClose={() => setLedgerBookModalOpen(false)}
-                ledgerAccountId={bankInfo._id}
-                ledgerAccountName={bankInfo.bankName}
-                ledgerEntityType="Bank"
-              />
-            )}
+      {ledgerBookModalOpen && (
+        <LedgerBookModal
+          onClose={() => setLedgerBookModalOpen(false)}
+          ledgerAccountId={bankInfo._id}
+          ledgerAccountName={bankInfo.bankName}
+          ledgerEntityType="Bank"
+        />
+      )}
     </div>
   );
 }

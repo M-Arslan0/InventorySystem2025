@@ -21,6 +21,8 @@ import companyController from "./controller/companyController.js";
 import userController from "./controller/userController.js";
 import productController from "./controller/productController.js";
 import salesController from "./controller/salesController.js";
+import supplierController from "./controller/supplierController.js";
+import purchaseController from "./controller/purchaseController.js";
 
 // Load environment variables
 dotenv.config();
@@ -42,8 +44,10 @@ app.use("/company", companyController);
 app.use("/account", accountController);
 app.use("/subAccount", subAccountController);
 app.use("/customer", customerController);
+app.use("/supplier", supplierController);
 app.use("/product", productController);
 app.use("/sales", salesController);
+app.use("/purchase", purchaseController);
 app.use("/voucher", voucherController);
 app.use("/ledgerBook", ledgerController);
 app.use("/bank", bankController);

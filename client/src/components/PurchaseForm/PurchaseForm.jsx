@@ -1,285 +1,196 @@
-// src/pages/Sale.jsx
-import { useState } from "react";
-import FindBillsModal from "../../modals/FindBillsModal";
-import {
-	FaCircleUser,
-	FaMagnifyingGlass,
-	FaCircleLeft,
-	FaCircleRight,
-	FaFileLines,
-	FaPrint,
-	FaLayerGroup,
-	FaFileInvoice,
-	FaXmark,
-} from "react-icons/fa6";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { request } from "../../util/fetchAPI";
+import ReactSelect from "react-select";
+import { FaMagnifyingGlass, FaCircleLeft, FaCircleRight } from "react-icons/fa6";
+import { FiPrinter } from "react-icons/fi";
+import { FaRegTrashAlt } from "react-icons/fa";
 
-export default function PurchaseForm() {
-	const [findBillsModalOpen, setFindBillsModalOpen] = useState(false)
-	const [activeTab, setActiveTab] = useState("unpaid");
+import useGetAllSuppliers from "../../hooks/useGetAllSuppliers";
+import useGetAllProductsForSales from "../../hooks/useGetAllProductsForSales";
 
-	return (
-		<div className="flex flex-col w-[100%]">
-			<div className="sale-page">
-				{/* Page Menu */}
-				<div className="w-[100%] p-1 row page-menu border-b-2 border-[#589191]">
-					<div className="flex gap-1 h-2vh items-center">
-						<button>
-							<FaCircleLeft className="text-base" />
-						</button>
-						<button>
-							<FaCircleRight className="text-base" />
-						</button>
-						<span className="mb-2">|</span>
-						<button className="flex gap-1 text-sm" onClick={() => setFindBillsModalOpen(true)}>
-							<FaMagnifyingGlass className="text-sm " /> FIND
-						</button>
-						<span className="mb-2">|</span>
+export default function Purchase() {
+  const { register, handleSubmit, setValue, watch, reset } = useForm({
+    defaultValues: {
+      supplierId: "",
+      purchaseInvDate: new Date().toISOString().split("T")[0],
+      purchaseInvNo: "",
+    },
+  });
 
-						<button className="flex gap-1 text-sm">
-							<FaFileLines className="text-sm" /> CREATE NEW
-						</button>
+  const { supplierData } = useGetAllSuppliers();
+  const { productsForSales: products } = useGetAllProductsForSales();
 
-						<span className="mb-2">|</span>
-						<label>SELECT</label>
-						<select style={{ width: "25%" }} className="bg-white ml-5">
-							<option selected hidden>Select Vendor</option>
-							<option>Vendor -2</option>
-							<option>Vendor -3</option>
-							<option>Vendor -4</option>
-						</select>
-						<label>Date</label>
-						<input type="date" style={{ width: "10%" }} className="bg-white" />
-						<label>Bill No</label>
-						<input type="text" style={{ width: "10%" }} className="bg-white" />
+  const [selectedProduct, setSelectedProduct] = useState([]);
+  const [isQtyInvalid, setIsQtyInvalid] = useState(false);
 
-						<select style={{ width: "8%", fontSize: "13px" }} className="bg-white ml-10">
-							<option>Print</option>
-							<option>Print Preview</option>
-							<option>Save PDF</option>
-						</select>
-						<button className="flex gap-1 text-sm">
-							<FaPrint className="text-sm" />PRINT
-						</button>
-						<select style={{ width: "8%", fontSize: "13px" }} className="bg-white">
-							<option>A5</option>
-							<option>A4</option>
-							<option>Thermal</option>
-							<option>NTN</option>
-							<option>Office</option>
-							<option>Letter Head</option>
-							<option>Quotation</option>
-						</select>
-					</div>
-				</div>
+  const productQty = watch("productQty") || 0;
+  const selectedProductId = watch("productId");
 
+  const addProductToInvoice = () => {
+    const productId = watch("productId");
+    const qty = parseFloat(watch("productQty") || 0);
+    const rate = parseFloat(watch("productRate") || 0);
 
-			</div>
+    if (!productId || qty <= 0 || rate <= 0) {
+      alert("Please select product & valid qty/rate");
+      return;
+    }
 
-			{/* Example Tabs */}
-			<div className="flex gap-1.5 w-[98%] mx-auto justify-between items-start min-h-[80vh] mt-2 ">
+    const product = products.find((p) => p._id === productId);
 
-				{/*  Left Side */}
+    const item = {
+      id: Date.now(),
+      productId: product._id,
+      productName: product.productName,
+      qty,
+      rate,
+      amount: qty * rate,
+      productPurchaseAc: product.productPurchaseAc,
+      productInventoryAc: product.productInventoryAc,
+    };
 
+    setSelectedProduct((prev) => [...prev, item]);
+    setValue("productId", "");
+    setValue("productQty", "");
+    setValue("productRate", "");
+  };
 
-				<div className="card data-entery min-h-[80vh] w-[75%] p-2 bg-white rounded-lg shadow-lg">
+  const removeItem = (id) => {
+    setSelectedProduct((prev) => prev.filter((e) => e.id !== id));
+  };
 
-					<div className="min-h-[73vh]">
-						<div className="data-entery-header">
-							<label htmlFor="proCode">Select Product</label>
-							<select className="bg-white">
-								<option value="">Product name</option>
-								<option value="">Product name -1 | Rs. 120.00</option>
-								<option value="">Product name -2 | Rs. 120.00</option>
-								<option value="">Product name -3 | Rs. 120.00</option>
-								<option value="">Product name -4 | Rs. 120.00</option>
-								<option value="">Product name -5 | Rs. 120.00</option>
-								<option value="">Product name -6 | Rs. 120.00</option>
-								<option value="">Product name -7 | Rs. 120.00</option>
-							</select>
-							<input type="number" name="qty" placeholder="Qty" className="bg-white ml-2" />
-							<input type="number" name="price" placeholder="Rate" className="bg-white ml-2" />
-							<input type="number" name="price" placeholder="%" className="bg-white ml-2" />
-							<button className="ml-2">ADD</button>
+  const calculateTotals = () => {
+    const total = selectedProduct.reduce((s, e) => s + e.amount, 0);
+    const paid = watch("paidAmount") || 0;
 
-							{/* Hold */}
-							<label style={{ float: "right" }}>Hold</label>
-							<input
-								type="checkbox"
-								style={{ width: "20px", float: "right", marginTop: "8px" }}
-							/>
-						</div>
+    return {
+      total,
+      balance: total - paid,
+    };
+  };
 
-						{/* Invoice Table */}
-						<table>
-							<thead>
-								<tr>
-									<th className="w-5% text-align-center">SR</th>
-									<th className="w-60%">PRODUCT NAME</th>
-									<th className="w-10% text-align-center">QTY</th>
-									<th className="w-10% text-align-right">RATE</th>
-									<th className="w-20% text-align-right">AMOUNT</th>
-									<th className="w-20% text-align-right">%</th>
-									<th className="w-20% text-align-right">Free</th>
-									<th className="w-20% text-align-right">Net Amount</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td className="text-align-center">1</td>
-									<td>Product name -1</td>
-									<td className="text-align-center">12</td>
-									<td className="text-align-right">35.00</td>
-									<td className="text-align-right">420.00</td>
-									<td className="text-align-right">420.00</td>
-									<td className="text-align-right">420.00</td>
-									<td className="text-align-right">420.00</td>
-								</tr>
-							</tbody>
-						</table>
-					</div>
-					{/* Totals Row */}
-					<div className="min-h-5 flex justify-around">
-						{[
-							{ title: "Total Quantity", value: "77", color: "bg-green" },
-							{ title: "Total Items", value: "16", color: "bg-green" },
-							{ title: "Balance Due", value: "Rs: 114,800.00", color: "bg-orange" },
-							{ title: "Received Amount", value: "Rs: 0.00", color: "bg-pink" },
-							{ title: "Previous Balance", value: "Rs: 10,000.00", color: "bg-green" },
-							{ title: "Invoice Total", value: "Rs: 104,800.00", color: "bg-green" },
-						].map((card, idx) => (
-							<div key={idx} className="col-2 cards">
-								<div className="card-2 transition">
-									<div className="card-header">
-										<div>
-											<div className="card-title-2">{card.title}</div>
-											<div className="card-value-2">{card.value}</div>
-										</div>
-										<div className={`card-icon-2 ${card.color}`}>
-											<FaLayerGroup />
-										</div>
-									</div>
-								</div>
-							</div>
-						))}
-					</div>
-				</div>
+  const { total, balance } = calculateTotals();
 
+  const onSubmit = async (formData) => {
+    const purchaseProducts = selectedProduct.map((p) => ({
+      productId: p.productId,
+      productQty: p.qty,
+      productRate: p.rate,
+      productAmount: p.amount,
+      productPurchaseAc: p.productPurchaseAc,
+      productInventoryAc: p.productInventoryAc,
+    }));
 
+    const data = {
+      purchaseInvNo: formData.purchaseInvNo,
+      purchaseInvDate: formData.purchaseInvDate,
+      supplierId: formData.supplierId,
+      products: purchaseProducts,
+      invoiceAmount: total,
+      paidAmount: formData.paidAmount,
+      balanceDue: balance,
+    };
+    console.log(data)
+    await request("/purchase/createPurchaseInvoice", "POST", {
+      "Content-Type": "application/json",
+    }, {...data});
 
-				{/* Right Sidebar */}
-				<div className="flex flex-col min-h-[80vh] justify-center w-[25%] bg-white p-2 rounded-lg shadow-lg">
+    alert("Purchase Invoice Created Successfully");
+  };
 
-					<div className="w-[100%] h-[60vh] cards p-2">
-						<div className="tab rounded-sm ">
-							<div className="flex gap-2 mx-auto justify-between w-[100%] p-2">
-								<select style={{ width: "100%", fontSize: "13px" }} className="bg-white">
-									<option>Regular</option>
-									<option>Percentage</option>
-									<option>With Free Good</option>
-								</select>
-							</div>
+  return (
+    <div className="w-full h-full p-2">
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <div className="p-2 bg-teal-700 text-white flex justify-between rounded">
+          <div className="flex gap-4 items-center">
+            <span>INVOICE #</span>
+            <input {...register("purchaseInvNo")} className="bg-white text-black px-3 py-1 rounded" />
+          </div>
 
+          <div className="flex gap-3 items-center">
+            <input type="date" {...register("purchaseInvDate")} className="px-3 py-1 rounded text-black" />
+            <button className="px-3 py-1 bg-white text-teal-700 rounded flex items-center gap-2">
+              <FiPrinter /> PRINT
+            </button>
+          </div>
+        </div>
 
-							<button
-								className={`tab-btn ${activeTab === "unpaid" ? "active" : ""} flex text-sm gap-1`}
-								onClick={() => setActiveTab("unpaid")}
-							>
-								<FaFileInvoice /> Unpaid
-							</button>
-							<button
-								className={`tab-btn ${activeTab === "today" ? "active" : ""} flex text-sm gap-1`}
-								onClick={() => setActiveTab("today")}
-							>
-								<FaLayerGroup /> Today
-							</button>
-							<button
-								className={`tab-btn ${activeTab === "hold" ? "active" : ""} flex text-sm gap-1`}
-								onClick={() => setActiveTab("hold")}
-							>
-								<FaLayerGroup /> Hold
-							</button>
-						</div>
+        <div className="bg-teal-500 mt-2 p-3 rounded text-white flex gap-4 items-center">
+          <span>SUPPLIER</span>
+          <ReactSelect
+            options={supplierData.map((s) => ({ value: s._id, label: s.supplierName }))}
+            onChange={(opt) => setValue("supplierId", opt?.value)}
+            className="w-64"
+          />
+        </div>
 
-						<div className="tab-content">
-							{activeTab === "unpaid" && (
-								<table className="bg-bb-pink">
-									<thead>
-										<tr>
-											<th>Date</th>
-											<th>Inv #</th>
-											<th>Amount</th>
-										</tr>
-									</thead>
-									<tbody>
-										<tr>
-											<td>08-06-25</td>
-											<td>25-00031</td>
-											<td>1,850.00</td>
-										</tr>
-										<tr>
-											<td>12-06-25</td>
-											<td>25-00001</td>
-											<td>11,680.00</td>
-										</tr>
-									</tbody>
-								</table>
-							)}
+        {/* Product Entry */}
+        <div className="mt-3 p-2 bg-white rounded shadow flex gap-3 items-center">
+          <ReactSelect
+            options={products.map((p) => ({ value: p._id, label: p.productName }))}
+            onChange={(opt) => setValue("productId", opt?.value)}
+            className="w-[50%]"
+          />
 
-							{activeTab === "today" && (
-								<table className="bg-lt-blue">
-									<thead>
-										<tr>
-											<th>Date</th>
-											<th>Inv #</th>
-											<th>Amount</th>
-										</tr>
-									</thead>
-									<tbody>
-										<tr>
-											<td>14-06-25</td>
-											<td>25-00100</td>
-											<td>1,850.00</td>
-										</tr>
-									</tbody>
-								</table>
-							)}
+          <input type="number" {...register("productQty")} placeholder="Qty" className="border p-1 w-20" />
+          <input type="number" {...register("productRate")} placeholder="Rate" className="border p-1 w-20" />
 
-							{activeTab === "hold" && (
-								<table className="bg-lt-green">
-									<thead>
-										<tr>
-											<th>Date</th>
-											<th>Inv #</th>
-											<th>Amount</th>
-										</tr>
-									</thead>
-									<tbody>
-										<tr>
-											<td>08-06-25</td>
-											<td>25-00031</td>
-											<td>1,850.00</td>
-										</tr>
-									</tbody>
-								</table>
-							)}
-						</div>
-					</div>
+          <button type="button" onClick={addProductToInvoice} className="bg-teal-600 px-3 py-1 text-white rounded">
+            Add
+          </button>
+        </div>
 
-					<div className="card entery-btn" style={{ minHeight: "20vh" }}>
-						<img src="img/Sale-Profit.png" alt="" style={{ width: "100%" }} />
-						<div className="flex justify-around mt-2">
-							<button>New</button>
-							<button>Save</button>
-							<button>Clear</button>
-							<button>Delete</button>
-						</div>
+        {/* Product Table */}
+        <table className="w-full mt-2 bg-white rounded shadow">
+          <thead className="bg-gray-200">
+            <tr>
+              <th>#</th>
+              <th>Product</th>
+              <th>Qty</th>
+              <th>Rate</th>
+              <th>Amount</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {selectedProduct.map((p, i) => (
+              <tr key={p.id}>
+                <td>{i + 1}</td>
+                <td>{p.productName}</td>
+                <td className="text-center">{p.qty}</td>
+                <td className="text-center">{p.rate}</td>
+                <td className="text-right">{p.amount}</td>
+                <td className="text-center">
+                  <button onClick={() => removeItem(p.id)}>
+                    <FaRegTrashAlt />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
 
-					</div>
-				</div>
-			</div>
+        {/* Summary */}
+        <div className="mt-4 bg-gray-100 p-3 rounded flex gap-5">
+          <div className="w-[50%]">
+            <label>Paid Amount</label>
+            <input
+              type="number"
+              {...register("paidAmount")}
+              className="w-full p-2 border rounded"
+            />
+          </div>
 
-			{findBillsModalOpen &&
-				<FindBillsModal />}
-		</div>
-	);
+          <div className="w-[50%] bg-white p-3 rounded shadow">
+            <div>Total: {total}</div>
+            <div>Paid: {watch("paidAmount")}</div>
+            <div className="text-red-600">Balance: {balance}</div>
+          </div>
+
+          <button className="bg-teal-600 text-white px-5 py-2 rounded h-fit">Submit</button>
+        </div>
+      </form>
+    </div>
+  );
 }

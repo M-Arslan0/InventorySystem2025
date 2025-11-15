@@ -50,23 +50,30 @@ ledgerController.get("/getLedgerBy/:id", async (req, res) => {
   try {
     const { id } = req.params
     const { ledgerEntityType } = req.query
+    console.log(id)
+    if (ledgerEntityType !== "undefined") {
+      const entityModel = mongoose.model(ledgerEntityType);
+      const entityData = await entityModel.findById(id)
+      if (!entityData) {
+        return res.status(400).json({ message: "Invalid ID format" });
+      }
+      const ledger = await ledgerBookModel
+        .find({ $and: [{ ledgerEntityId: id }, { ledgerAccount: entityData.ledgerAccount }] }).populate("ledgerAccount").populate("referenceId");
+      return res.status(200).json(ledger);
+    }
+       const ledger = await ledgerBookModel
+        .find({ledgerAccount:id}).populate("ledgerAccount").populate("referenceId");
+      if (!ledger) {
+        return res.status(404).json({ message: "Ledger entry not found" });
+      }
+      return res.status(200).json(ledger);
 
-    const entityModel = mongoose.model(ledgerEntityType);
-    const entityData = await entityModel.findById(id)
-    if (!entityData) {
-      return res.status(400).json({ message: "Invalid ID format" });
-    }
-    const ledger = await ledgerBookModel
-      .find({ $and: [{ ledgerEntityId: id }, { ledgerAccount: entityData.ledgerAccount }] }).populate("ledgerAccount").populate("referenceId");
-    if (!ledger) {
-      return res.status(404).json({ message: "Ledger entry not found" });
-    }
-    res.status(200).json(ledger);
   } catch (error) {
     console.error("Error fetching ledger entry:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 });
+
 
 /* ────────────────────────────────
    🟠 Get Single Ledger by ID

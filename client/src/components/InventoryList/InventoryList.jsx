@@ -62,9 +62,9 @@ const outOfStockCount = products
   : "--";
 
 const stockCards = [
+  { title: "Products", value: products ? products.length : "--", icon: FaExclamationTriangle, color: "text-orange-500" },
   { title: "Low Stock", value: lowStockCount, icon: FaExclamationTriangle, color: "text-orange-500" },
   { title: "Out of Stock", value: outOfStockCount, icon: FaHourglass, color: "text-green-600" },
-  { title: "Wrong Price", value: "--", icon: FaDownLong, color: "text-pink-500" },
   { title: "Dead Stock", value: "--", icon: FaExclamationTriangle, color: "text-purple-600" },
 ];
 
@@ -118,13 +118,13 @@ const filteredProducts = products.filter((p) => {
                 placeholder="Search Products"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="border rounded-lg p-2 flex-1 shadow-sm focus:ring-2 focus:ring-blue-300"
+                className="rounded-lg p-2 flex-1 shadow-sm"
               />
 
               <ReactSelect
                 options={brandData.map(d => ({ label: d.brandName, value: d._id }))}
                 placeholder="Brand"
-                className="w-40"
+                className="w-40 focus:outline-none"
                 onChange={e => setSelectedBrand(e?.value || "")}
                 isClearable
               />
@@ -135,20 +135,24 @@ const filteredProducts = products.filter((p) => {
                 onChange={e => setSelectedCategory(e?.value || "")}
                 isClearable
               />
-              <button className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 "
-                onClick={() => refetchProduct()}>
-                Refresh
-              </button>
-              <button
+
+                 <button
                 onClick={() => {
                   setSearch("");
                   setSelectedBrand("");
                   setSelectedCategory("");
                 }}
+                style={{background: "#f0f0f0", color: "#333"}}
                 className="px-3 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
               >
                 RESET
               </button>
+
+              <button className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 "
+                onClick={() => refetchProduct()}>
+                Refresh
+              </button>
+
             </div>
 
             {/* Table */}
@@ -156,23 +160,23 @@ const filteredProducts = products.filter((p) => {
               <p>Loading...</p>
             ) : (
               <table className="w-full">
-                <thead>
+                <thead className="border-[0.1px]">
                   <tr className="bg-gray-100">
                     {["CODE", "PRODUCT NAME", "COST", "SP RATE", "WHOLE SALE", "RETAIL", "In-Hand"].map((h, i) => (
-                      <th key={i} className="p-2 text-sm font-medium">{h}</th>
+                      <th key={i} className={`text-sm font-medium ${i === 0 || i === 1 ? "text-left" : "text-center"}`}>{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {filteredProducts.map((data, i) => (
-                    <tr key={i} className="hover:bg-gray-50">
-                      <td className="p-2">{data.productCode}</td>
-                      <td className="p-2 w-[30%]">{data.productName}</td>
-                      <td className="p-2 text-center">{data.productCost.toFixed(2)}</td>
-                      <td className="p-2 text-center">{data.productSpRate.toFixed(2)}</td>
-                      <td className="p-2 text-center">{data.productWhRate.toFixed(2)}</td>
-                      <td className="p-2 text-center">{data.productRtRate.toFixed(2)}</td>
-                      <td className="p-2 text-center">{data.currentQty}</td>
+                    <tr key={i} className="hover:bg-gray-50 border-[0.1px] cursor-pointer">
+                      <td className="text-left border w-[5%]">{data.productCode}</td>
+                      <td className="w-[30%] text-left">{data.productName}</td>
+                      <td className="text-center border w-[10%]">{data.productCost.toFixed(2)}</td>
+                      <td className="text-center border w-[10%]">{data.productSpRate.toFixed(2)}</td>
+                      <td className="text-center border w-[10%]">{data.productWhRate.toFixed(2)}</td>
+                      <td className="text-center border w-[10%]">{data.productRtRate.toFixed(2)}</td>
+                      <td className={` ${data.currentQty <= 0 ? "text-red-600 font-bold" : ""} ${data.currentQty > data.maxQty || data.currentQty < data.minQty  ? "text-orange-600 font-bold" : ""} text-center border-black w-[10%]`}>{data.currentQty}</td>
                     </tr>
                   ))}
                 </tbody>

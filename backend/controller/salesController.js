@@ -15,7 +15,7 @@ salesController.post("/createSalesInvoice", async (req, res) => {
     const session = await mongoose.startSession();
     session.startTransaction();
     try {
-        const { products, customerId } = req.body;
+        const { products, customerId, receivedAmount } = req.body;
 
         // ✅ Check customer
         const customer = await customerModel.findById(customerId).session(session);
@@ -31,12 +31,35 @@ salesController.post("/createSalesInvoice", async (req, res) => {
 
         // ✅ Create Sales Invoice & Products
         const [invoice] = await salesInvoiceModel.insertMany([req.body], { session });
+
         const invoiceProducts = products.map(p => ({ ...p, salesInvId: invoice._id }));
         await salesInvoiceProductsModel.insertMany(invoiceProducts, { session });
 
-        // ✅ Ledger Entries
+        // ========================================================
+        // 1️⃣ Voucher Create First (IF receivedAmount > 0)
+        // ========================================================
+
+        let voucher = null;
+
+        if (receivedAmount > 0) {
+            voucher = await voucherModel.create([{
+                voucherDate: new Date(),
+                voucherRefNo: new Date().getTime().toString(),
+                voucherType: "Receipt",
+                debitAccount: customer._id,
+                creditAccount: customer.ledgerAccount,
+                narration: `Payment received against Invoice ${invoice.salesInvNo}`,
+                voucherAmount: receivedAmount || 0,
+                isPostedToLedger: true,
+            }], { session });
+        }
+
+        // ========================================================
+        // 2️⃣ Ledger Entries After Voucher
+        // ========================================================
+
         const ledgerEntries = [
-            // Debit Customer
+            // Debit Customer (invoice total)
             {
                 ledgerDate: new Date(),
                 ledgerAccount: customer.ledgerAccount,
@@ -48,7 +71,21 @@ salesController.post("/createSalesInvoice", async (req, res) => {
                 balanceAmount: invoice.invoiceAmount,
                 remarks: `Sales Invoice ${invoice.salesInvNo} - Debit`,
             },
-            // Credit each product sales A/C
+
+            // Credit (only if receivedAmount > 0)
+            ...(receivedAmount > 0 ? [{
+                ledgerDate: new Date(),
+                ledgerAccount: customer.ledgerAccount,
+                ledgerEntityId: customer._id,
+                ledgerEntityType: "Customer",
+                referenceId: voucher ? voucher[0]._id : invoice._id,
+                referenceModel: "Voucher",
+                transectionType: "credit",
+                balanceAmount: receivedAmount,
+                remarks: `Payment Received for Invoice ${invoice.salesInvNo}`,
+            }] : []),
+
+            // Credit Product Sale Accounts
             ...products.map(p => ({
                 ledgerDate: new Date(),
                 ledgerAccount: p.productSaleAc,
@@ -61,18 +98,23 @@ salesController.post("/createSalesInvoice", async (req, res) => {
                 remarks: `Sales Invoice ${invoice.salesInvNo} - Credit ${p.productName}`,
             }))
         ];
+
         await ledgerBookModel.insertMany(ledgerEntries, { session });
 
-        // ✅ Inventory Update
+        // ========================================================
+        // 3️⃣ Inventory Update
+        // ========================================================
         const bulkOps = products.map(p => ({
             updateOne: {
                 filter: { _id: p.productId },
-                update: { $inc: { outQty: p.productQty, currentQty: -p.productQty} }
+                update: { $inc: { outQty: p.productQty, currentQty: -p.productQty } }
             }
         }));
         await inventoryModel.bulkWrite(bulkOps, { session });
 
-        // ✅ Inventory Ledger
+        // ========================================================
+        // 4️⃣ Inventory Ledger
+        // ========================================================
         const inventoryLedgerEntries = products.map(p => ({
             productId: p.productId,
             refType: "SalesInvoice",
@@ -83,6 +125,7 @@ salesController.post("/createSalesInvoice", async (req, res) => {
             totalValue: p.productAmount,
             remarks: `Sold ${p.productQty} units of ${p.productName} in Invoice ${invoice.salesInvNo}`,
         }));
+
         await inventoryLedgerModel.insertMany(inventoryLedgerEntries, { session });
 
         await session.commitTransaction();

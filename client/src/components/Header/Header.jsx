@@ -28,7 +28,7 @@ export default function Header() {
     { name: "SALE", path: "/SaleForm" },
     { name: "INVENTORY", path: "/InventoryList" },
     { name: "PURCHASE", path: "/PurchaseForm" },
-    { name: "VENDOR", path: "/VendorList" },
+    { name: "SUPPLIER", path: "/SupplierList" },
     { name: "ACCOUNT", path: "/AccountsManagement" },
     { name: "SETTINGS", path: "/Settings" },
   ];
